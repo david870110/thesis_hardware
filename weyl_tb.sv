@@ -55,20 +55,15 @@ module weyl_tb;
     //   weyl_out[(BASE + i*STRIDE) % BITSTREAM] = quota_mask[i]
     // ---------------------------------------------------------------------------
     function automatic logic [TB_BITSTREAM-1:0] ref_weyl (int q);
-        logic [TB_BITSTREAM-1:0] one_hot;
-        logic [TB_BITSTREAM-1:0] quota_mask;
         logic [TB_BITSTREAM-1:0] permuted;
         int idx;
         begin
-            one_hot    = '0;
-            quota_mask = '0;
             permuted   = '0;
-
-        for (int i = 0; i < q; i++) begin
-            idx = (TB_BASE + TB_STRIDE) % TB_BITSTREAM;
-            permuted[idx] = 1'b1;
-        end 
-        return permuted;
+            for (int i = 0; i < q; i++) begin
+                idx = (TB_BASE + TB_STRIDE) % TB_BITSTREAM + idx;
+                permuted[idx] = 1'b1;
+            end 
+            return permuted;
         end
     endfunction
 
