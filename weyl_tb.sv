@@ -60,7 +60,7 @@ module weyl_tb;
         begin
             permuted   = '0;
             for (int i = 0; i < q; i++) begin
-                idx = (TB_BASE + TB_STRIDE) % TB_BITSTREAM + idx;
+                idx = (TB_BASE + TB_STRIDE + idx) % TB_BITSTREAM ;
                 permuted[idx] = 1'b1;
             end 
             return permuted;
