@@ -13,13 +13,7 @@ module WEYL #(
     assign one_hot = ({{(BITSTREAM-1){1'b0}},1'b1}) << quota_num;
 
     // thermometer
-    assign quota_mask[0] = 1'b0;
-    generate
-        genvar k;
-        for (k = 1; k < BITSTREAM; k = k + 1) begin : GEN_THERM
-            assign quota_mask[k] = quota_mask[k-1] | one_hot[k-1];
-        end
-    endgenerate
+    assign quota_mask = one_hot - 1'b1;
     
     // stride phase and connect wire
     generate
