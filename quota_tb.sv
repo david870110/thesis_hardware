@@ -88,7 +88,7 @@ module QUOTA_TB;
 
             if (quota_out !== golden) begin
                 errors++;
-                $error("Mismatch at q=%0d: design=%0h tb=%0h", q, quota_out, golden);
+                $error("Mismatch at q=%0d: design=%0d tb=%0d", q, quota_out, golden);
             end
         end
 
@@ -102,7 +102,7 @@ module QUOTA_TB;
 
             if (quota_out !== golden) begin
                 errors++;
-                $error("Mismatch at q=%0d: design=%0h tb=%0h", q, quota_out, golden);
+                $error("Mismatch at q=%0d: design=%0d tb=%0d", q, quota_out, golden);
             end
         end
 
