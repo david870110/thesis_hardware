@@ -93,7 +93,7 @@ module QUOTA_TB;
         end
 
         // A few randoms (in-range)
-        for (int t = 0; t < 100; t++) begin
+        for (int t = 0; t < 1000; t++) begin
             logic [$clog2(TB_BITSTREAM)-1:0] golden;
             int q = $urandom_range(DATA_RANGE_NEG, DATA_RANGE_POS);
             data = q;
