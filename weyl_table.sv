@@ -13,7 +13,7 @@ module WEYL #(
     assign one_hot = ({{(BITSTREAM-1){1'b0}},1'b1}) << quota_num;
 
     // thermometer
-    assign quota_mask = one_hot - 1'b1;
+    assign quota_mask = one_hot - 1; // 64-bit 
     
     // stride phase and connect wire
     generate
@@ -21,6 +21,6 @@ module WEYL #(
         for (i = 0; i < BITSTREAM; i++) begin : GEN_TABLE
             localparam int IDX = (BASE + (i*STRIDE)) % BITSTREAM; 
             assign weyl_out[IDX] = quota_mask[i];
-        end
+        end  
     endgenerate
 endmodule
