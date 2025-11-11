@@ -2,7 +2,7 @@ module QUOTA #(
     parameter BITSTREAM = 64,
     parameter QUANT     = 8
 )(
-    input  signed   [$clog2(QUANT)-1 : 0]          data,
+    input  signed   [QUANT - 1: 0]          data,
     output unsigned [$clog2(BITSTREAM)-1 : 0]      quota
 );
     localparam QUANT_VALUE = 1 << QUANT;
