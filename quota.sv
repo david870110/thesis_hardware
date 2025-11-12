@@ -1,3 +1,4 @@
+// 42 GE
 module QUOTA #(
     parameter BITSTREAM = 64,
     parameter QUANT     = 8
