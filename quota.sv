@@ -14,7 +14,7 @@ module QUOTA #(
     end
 
 
-    wire [QUANT : 0 ] bias_data,round_data;
+    logic [QUANT : 0 ] bias_data,round_data;
 
     // bias data
     assign bias_data = data + (9'd1 << (QUANT-1));

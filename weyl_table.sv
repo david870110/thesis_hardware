@@ -7,7 +7,7 @@ module WEYL #(
     input  [$clog2(BITSTREAM)-1 : 0]    quota_num,
     output [BITSTREAM-1 : 0]            weyl_out
 );
-    wire [BITSTREAM-1 : 0 ] one_hot,quota_mask;
+    logic [BITSTREAM-1 : 0 ] one_hot,quota_mask;
 
     // one-hot
     assign one_hot = ({{(BITSTREAM-1){1'b0}},1'b1}) << quota_num;
