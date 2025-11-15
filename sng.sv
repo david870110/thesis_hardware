@@ -9,7 +9,7 @@ module SNG #(
     output  [BITSTREAM-1 : 0]      oBitstream
 );
 
-    logic [$clog2(BITSTREAM) - 1 : 0 ] quota_num;
+    logic [$clog2(BITSTREAM) : 0 ] quota_num;
 
 
 
