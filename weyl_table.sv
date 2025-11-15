@@ -18,7 +18,7 @@ module WEYL #(
     // 後面不變
     genvar k;
     generate
-    for (k = BITSTREAM; k >= 0; k = k - 1) begin
+    for (k = (BITSTREAM-1); k >= 0; k = k - 1) begin
         assign quota_mask[k-1] = quota_mask[k] | one_hot[k];
     end
     endgenerate
