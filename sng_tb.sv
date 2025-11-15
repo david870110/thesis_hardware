@@ -63,15 +63,16 @@ module SNG_TB;
     // s = (u * T + (1<< (QUANT-1) ) ) >> QUANT
     // return s
     // ---------------------------------------------------------------------------
-    function automatic logic [TB_BITSTREAM-1:0] ref_sng (int q);
-        logic [TB_BITSTREAM-1 : 0] tb_bitstream;
-        int idx;
+    function automatic logic [TB_BITSTREAM - 1:0] ref_sng (int q);
+        logic [TB_BITSTREAM - 1 : 0] tb_bitstream;
+        int idx , u , s;
         begin
             //quota 
-            int u = q + (1 << (TB_QUANT-1));
-            int s = (u * TB_BITSTREAM + (1<< (TB_QUANT-1) ) ) >> TB_QUANT;
+            u = q + (1 << (TB_QUANT-1));
+            s = (u * TB_BITSTREAM + (1<< (TB_QUANT-1) ) ) >> TB_QUANT;
             
             //weyl
+            tb_bitstream = '0;
             idx = TB_BASE;
             for (int i = 0; i < s; i++) begin
                 tb_bitstream[idx] = 1'b1;
@@ -85,8 +86,8 @@ module SNG_TB;
 
 
     integer errors = 0;
-    integer DATA_RANGE_NEG = 1 - (1 << (TB_QUANT-1));
-    integer DATA_RANGE_POS = (1 << (TB_QUANT-1));
+    localparam int DATA_RANGE_NEG = -(1 << (TB_QUANT-1));         // -128
+    localparam int DATA_RANGE_POS =  (1 << (TB_QUANT-1)) - 1;     //  127
 
     // Optional VCD/FSDB dump
     initial begin
@@ -130,12 +131,13 @@ module SNG_TB;
         //     end
         // end
 
-        if (errors == 0)
+        if (errors == 0)begin
             $display("\n[PASS] All checks passed.\n");
-        else 
+            $finish;
+        end
+        else begin
             $display("\n[FAIL] %0d mismatches detected.\n", errors);
-
-        $fatal(1);
-        $finish;
+            $fatal(1);
+        end
     end
 endmodule
