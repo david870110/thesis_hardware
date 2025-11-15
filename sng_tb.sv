@@ -104,7 +104,7 @@ module SNG_TB;
 
         // Deterministic sweep
         for (int q = DATA_RANGE_NEG; q <= DATA_RANGE_POS; q++)begin
-            logic [$clog2(TB_BITSTREAM)-1:0] golden;
+            logic [TB_BITSTREAM-1:0] golden;
 
             iData = q;
             #1; // settle (purely combinational)
