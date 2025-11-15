@@ -3,8 +3,8 @@ module QUOTA #(
     parameter BITSTREAM = 64,
     parameter QUANT     = 8
 )(
-    input   [QUANT - 1: 0]                 data,
-    output  [$clog2(BITSTREAM)-1 : 0]      quota
+    input   [QUANT - 1: 0]                data,
+    output  [$clog2(BITSTREAM) : 0]      quota
 );
     localparam QUANT_DIV_T = QUANT - $clog2(BITSTREAM);
 

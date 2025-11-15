@@ -4,16 +4,24 @@ module WEYL #(
     parameter BASE      = 61,
     parameter STRIDE    = 17
 )(
-    input  [$clog2(BITSTREAM)-1 : 0]    quota_num,
+    input  [$clog2(BITSTREAM) : 0]      quota_num,
     output [BITSTREAM-1 : 0]            weyl_out
 );
     logic [BITSTREAM-1 : 0 ] one_hot,quota_mask;
 
     // one-hot 
-    assign one_hot = ({{(BITSTREAM-1){1'b0}},1'b1}) << quota_num;
+    assign one_hot = ({{(BITSTREAM-1){1'b0}},1'b1}) << quota_num[$clog2(BITSTREAM) - 1:0];
 
-    // thermometer 95 GE
-    assign quota_mask = one_hot - 1; // 64-bit 
+    // ★ 這裡從 0 改成 full64
+    assign quota_mask[BITSTREAM-1] = quota_num[$clog2(BITSTREAM)];
+
+    // 後面不變
+    genvar k;
+    generate
+    for (k = BITSTREAM; k >= 0; k = k - 1) begin
+        assign quota_mask[k-1] = quota_mask[k] | one_hot[k];
+    end
+    endgenerate
     
     // stride phase and connect wire
     generate
