@@ -9,10 +9,10 @@ module WEYL #(
 );
     logic [BITSTREAM-1 : 0 ] one_hot,quota_mask;
 
-    // one-hot
+    // one-hot 
     assign one_hot = ({{(BITSTREAM-1){1'b0}},1'b1}) << quota_num;
 
-    // thermometer
+    // thermometer 95 GE
     assign quota_mask = one_hot - 1; // 64-bit 
     
     // stride phase and connect wire
