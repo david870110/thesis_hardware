@@ -63,7 +63,7 @@ module SNG_TB;
     // s = (u * T + (1<< (QUANT-1) ) ) >> QUANT
     // return s
     // ---------------------------------------------------------------------------
-    function automatic logic [TB_QUANT-1:0] ref_sng (int q);
+    function automatic logic [TB_BITSTREAM-1:0] ref_sng (int q);
         logic [TB_BITSTREAM-1 : 0] tb_bitstream;
         int idx;
         begin
