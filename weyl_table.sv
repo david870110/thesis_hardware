@@ -4,7 +4,7 @@ module WEYL #(
     parameter BASE      = 61,
     parameter STRIDE    = 17
 )(
-    input  [$clog2(BITSTREAM) : 0]      quota_num,
+    input  unsigned [$clog2(BITSTREAM) : 0]      quota_num,
     output [BITSTREAM-1 : 0]            weyl_out
 );
     logic [BITSTREAM-1 : 0 ] one_hot,quota_mask;
