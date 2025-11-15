@@ -3,7 +3,7 @@ module QUOTA #(
     parameter BITSTREAM = 64,
     parameter QUANT     = 8
 )(
-    input  signed [QUANT - 1: 0]                data,
+    input   [QUANT - 1: 0]               data,
     output  [$clog2(BITSTREAM) : 0]      quota
 );
     localparam QUANT_DIV_T = QUANT - $clog2(BITSTREAM);
@@ -14,10 +14,13 @@ module QUOTA #(
     end
 
 
-    logic signed [QUANT : 0 ] bias_data,round_data;
-
+    logic [QUANT : 0 ] bias_data,round_data,data_s;
+    
+    // sign-extend
+    assign data_s    = {data[QUANT-1], data};
+    
     // bias data
-    assign bias_data = data + (9'd1 << (QUANT-1));
+    assign bias_data = data_s + (9'd1 << (QUANT-1));
 
     // rounding
     assign round_data = bias_data + (9'd1 << (QUANT_DIV_T - 1));

@@ -11,14 +11,13 @@ module WEYL #(
 
     // one-hot 
     assign one_hot = ({{(BITSTREAM-1){1'b0}},1'b1}) << quota_num[$clog2(BITSTREAM) - 1:0];
-
-    // ★ 這裡從 0 改成 full64
+    
+    
     assign quota_mask[BITSTREAM-1] = quota_num[$clog2(BITSTREAM)];
 
-    // 後面不變
     genvar k;
     generate
-    for (k = (BITSTREAM-1); k >= 0; k = k - 1) begin
+    for (k = (BITSTREAM-1); k > 0; k = k - 1) begin
         assign quota_mask[k-1] = quota_mask[k] | one_hot[k];
     end
     endgenerate
