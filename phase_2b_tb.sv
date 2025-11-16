@@ -14,7 +14,7 @@
 // -----------------------------------------------------------------------------
 
 `ifndef TB_BITSTREAM
-    `define TB_BITSTREAM 8
+    `define TB_BITSTREAM 64
 `endif
 
 
