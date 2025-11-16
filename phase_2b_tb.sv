@@ -14,7 +14,7 @@
 // -----------------------------------------------------------------------------
 
 `ifndef TB_BITSTREAM
-    `define TB_BITSTREAM 64
+    `define TB_BITSTREAM 8
 `endif
 
 
@@ -91,7 +91,7 @@ module PHASE_2b_TB;
             iBitstream = randNum;
             k = (k_phase);
             #1; // settle (purely combinational)
-            golden = ref_phase(k_phase,randNum);
+            golden = ref_phase(randNum,k_phase);
 
             if (oBitstream !== golden) begin
                 errors++;
