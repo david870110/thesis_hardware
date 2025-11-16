@@ -88,12 +88,13 @@ module PHASE_2b_TB;
 
         // Deterministic sweep
         for (int q = 0; q <= 100; q++)begin
-            logic [TB_BITSTREAM-1:0] golden;
+            logic [TB_BITSTREAM-1:0] golden , randNum;
             k_phase = q % 4;
-            iBitstream = rand64();
+            randNum = rand64();
+            iBitstream = randNum;
             k = (k_phase);
             #1; // settle (purely combinational)
-            golden = ref_phase(k_phase,rand64());
+            golden = ref_phase(k_phase,randNum);
 
             if (oBitstream !== golden) begin
                 errors++;
