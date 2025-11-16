@@ -56,11 +56,8 @@ module PHASE_2b_TB;
         input int                       k
     );
         logic [TB_BITSTREAM-1:0] out_bits;
-        int km;
         begin
-            km = ((k % TB_BITSTREAM) + TB_BITSTREAM) % TB_BITSTREAM;  // 安全取 mod，避免負值
-            out_bits = (km == 0) ? in_bits
-                                : ((in_bits >> km) | (in_bits << (TB_BITSTREAM - km))); // 右旋 k
+            out_bits = (k == 0) ? in_bits : ((in_bits >> k) | (in_bits << (TB_BITSTREAM - k))); // 右旋 k
             return out_bits;
         end
     endfunction
