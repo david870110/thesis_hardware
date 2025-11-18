@@ -1,6 +1,6 @@
 module tb_fifo;
     parameter DATA_WIDTH    = 64;
-    parameter DEPTH         = 'd1;
+    parameter DEPTH         = 'd2;
 
     reg clk, rst_n;
     reg w_valid;

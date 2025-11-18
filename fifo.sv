@@ -28,7 +28,7 @@ module fifo
     //*******************************************************************************************
     // - FIFO Status & ptr control
     //*******************************************************************************************    
-    reg [PTR_NUM_BITS-1 : 0] drp, wrp, rdp;
+    reg [PTR_NUM_BITS : 0] drp, wrp, rdp;
     wire fifo_pop,fifo_push;
     assign fifo_pop = !fifo_empty & r_ready;
     assign fifo_push = !fifo_full & w_valid;
