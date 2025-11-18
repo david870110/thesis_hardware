@@ -37,8 +37,9 @@ module tb_fifo;
     reg [TB_PTR_NUM_BITS:0] wrp, rdp;
     reg [TB_PTR_NUM_BITS:0] drp;  
     reg close_push,close_pop;
-    wire [DATA_WIDTH-1:0] push_data;
+    reg [DATA_WIDTH-1:0] push_data;
     wire fifo_push,fifo_pop;
+    reg [DATA_WIDTH-1:0] push_data_wire;
 
     assign fifo_push = !fifo_full & !close_push;
     assign fifo_pop = !fifo_empty & !close_pop;
@@ -55,7 +56,7 @@ module tb_fifo;
         begin
             if(fifo_push)
             begin
-                fifo_mem[wrp] <= push_data;
+                fifo_mem[wrp] <= push_data_wire;
                 if(wrp < TB_DEPTH-1)
                     wrp <= wrp + 1;
                 else
@@ -88,6 +89,7 @@ module tb_fifo;
         end
     endtask
 
+    assign push_data_wire = push_data;
 
     // *******************************************************************************************
     // task pop_wrtie_mem : 
@@ -97,7 +99,7 @@ module tb_fifo;
     //  - it will also to pop in TB FIFO.
     //  - !! mem_addr only plus one at pop fifo.
     // *******************************************************************************************   
-    assign data_in = push_data;
+    assign data_in = push_data_wire;
     assign r_ready = fifo_pop;
     assign w_valid = fifo_push;
     // always@(posedge clk or negedge rst_n)
