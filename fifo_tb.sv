@@ -62,7 +62,7 @@ module tb_fifo;
                     wrp <= 0;
                 drp <= drp + 1;
             end
-            if(r_ready)
+            if(fifo_pop)
             begin
                 if(rdp < TB_DEPTH-1)
                     rdp <= rdp + 1;
