@@ -98,25 +98,27 @@ module tb_fifo;
     //  - !! mem_addr only plus one at pop fifo.
     // *******************************************************************************************   
     assign data_in = push_data;
-    always@(posedge clk or negedge rst_n)
-    begin
-        if(fifo_pop)
-        begin
-            r_ready  <= 1;
-        end
-        else
-            r_ready <= 0;
-    end
+    assign r_ready = fifo_pop;
+    assign w_valid = fifo_push;
+    // always@(posedge clk or negedge rst_n)
+    // begin
+    //     if(fifo_pop)
+    //     begin
+    //         r_ready  <= 1;
+    //     end
+    //     else
+    //         r_ready <= 0;
+    // end
 
-    always@(posedge clk)
-    begin
-        if(fifo_push)
-        begin
-            w_valid <= 1;
-        end
-        else
-            w_valid <= 0;
-    end
+    // always@(posedge clk)
+    // begin
+    //     if(fifo_push)
+    //     begin
+    //         w_valid <= 1;
+    //     end
+    //     else
+    //         w_valid <= 0;
+    // end
 
 
     // *******************************************************************************************
