@@ -37,7 +37,7 @@ module tb_fifo;
     reg [TB_PTR_NUM_BITS:0] wrp, rdp;
     reg [TB_PTR_NUM_BITS:0] drp;  
     reg close_push,close_pop;
-    reg [DATA_WIDTH-1:0] push_data;
+    wire [DATA_WIDTH-1:0] push_data;
     wire fifo_push,fifo_pop;
 
     assign fifo_push = !fifo_full & !close_push;
