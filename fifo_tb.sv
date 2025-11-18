@@ -1,6 +1,6 @@
 module tb_fifo;
-    parameter DATA_WIDTH    = 32;
-    parameter DEPTH         = 1;
+    parameter DATA_WIDTH    = 64;
+    parameter DEPTH         = 'd1;
 
     reg clk, rst_n;
     reg w_valid;
@@ -16,9 +16,9 @@ module tb_fifo;
     )   inst_fifo
     (
         .clk         (clk),
-        .reset       (rst_n),
-        .pre_full   (fifo_full),
-        .pre_empty  (fifo_empty),
+        .rst_n       (rst_n),
+        .fifo_full   (fifo_full),
+        .fifo_empty  (fifo_empty),
         .w_valid     (w_valid),
         .r_ready     (r_ready),
         .data_in     (data_in),

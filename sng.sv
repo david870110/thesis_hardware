@@ -34,10 +34,10 @@ module SNG #(
         .quota_num (quota_num),
         .weyl_out  (weyl_bit)
     );
+
     always_ff @(posedge clk or negedge rst_n)
         if(!rst_n) k <= 0;
         else if(r_ready & w_valid) k <= k+1;
-                                
 
     PHASE_2b #(
         .BITSTREAM  (BITSTREAM)
@@ -46,5 +46,5 @@ module SNG #(
         .in_bits    (weyl_bit),
         .out_bits   (phase_bit)
     );
-    
+
 endmodule

@@ -15,10 +15,8 @@ module fifo
     input               rst_n ,
 
     // fifo status
-    output              pre_full,
-    output              pre_empty,
-    /*output              fifo_full,
-    output              fifo_empty,*/
+    output              fifo_full,
+    output              fifo_empty,
     // data protocol
     input               w_valid,
     input               r_ready,
@@ -32,15 +30,14 @@ module fifo
     //*******************************************************************************************    
     reg [PTR_NUM_BITS-1 : 0] drp, wrp, rdp;
     wire fifo_pop,fifo_push;
-    wire fifo_full,fifo_empty;
     assign fifo_pop = !fifo_empty & r_ready;
     assign fifo_push = !fifo_full & w_valid;
 
     // ---!!! fifo full and empty delay one cycle.  TB use pre_full, but design need full, fixed it in feature.
     assign fifo_full  = (drp == DEPTH );
     assign fifo_empty = (drp == 0); 
-    assign pre_full   = (drp == DEPTH );//((drp + fifo_push - fifo_pop) >= DEPTH);
-    assign pre_empty  = (drp == 0); //((drp + fifo_push - fifo_pop) <= 0);
+    // assign pre_full   = (drp == DEPTH );//((drp + fifo_push - fifo_pop) >= DEPTH);
+    // assign pre_empty  = (drp == 0); //((drp + fifo_push - fifo_pop) <= 0);
 
     always @(posedge clk or negedge rst_n) 
     begin
