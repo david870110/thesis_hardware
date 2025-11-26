@@ -1,48 +1,21 @@
-`timescale 1ns/1ps
-// -----------------------------------------------------------------------------
-// Testbench: weyl_tb
-// Purpose  : Self-checking, parameterized SV testbench for module WEYL
-// Design   : expects module WEYL in your compile list (e.g., weyl_table.sv)
-// Params   : Override at compile time with +define+TB_BITSTREAM=... etc.
-// Sim tips :
-//   - Questa  : vlog -sv weyl_table.sv weyl_tb.sv ; vsim -c weyl_tb -do "run -all; quit"
-//   - VCS     : vcs -sverilog weyl_table.sv weyl_tb.sv -R
-//   - Verilator: verilator -sv --cc --exe sim_main.cpp weyl_table.sv weyl_tb.sv  (or --binary)
-//   - Icarus  : iverilog -g2012 -o tb.vvp weyl_table.sv weyl_tb.sv ; vvp tb.vvp
-// -----------------------------------------------------------------------------
-
-`ifndef TB_BITSTREAM
-    `define TB_BITSTREAM 64
-`endif
-
-`ifndef TB_BASE
-    `define TB_BASE 2
-`endif
-
-`ifndef TB_STRIDE
-    `define TB_STRIDE 17
-`endif
-
-`ifndef TB_QUANT
-    `define TB_QUANT 8
-`endif
-
-
-
 module SNG_TB;
     // ---------------------------------------------------------------------------
     // Parameters for DUT instantiation (override with +define+TB_*)
     // ---------------------------------------------------------------------------
-    localparam int TB_BITSTREAM  = `TB_BITSTREAM;
-    localparam int TB_BASE       = `TB_BASE;
-    localparam int TB_STRIDE     = `TB_STRIDE;
-    localparam int TB_QUANT      = `TB_QUANT;
+    localparam int TB_BITSTREAM  = 64;
+    localparam int TB_BASE       = 2;
+    localparam int TB_STRIDE     = 17;
+    localparam int TB_QUANT      = 8;
 
     // ---------------------------------------------------------------------------
     // DUT I/O
     // ---------------------------------------------------------------------------
-    logic [TB_QUANT-1:0]        iData;
-    logic [TB_BITSTREAM-1:0]    oBitstream;
+    logic                       clk,rst_n;
+    logic                       w_valid;
+    logic                       r_ready;
+    logic                       wlast;
+    logic [TB_QUANT-1:0]        w_data;
+    logic [TB_BITSTREAM-1:0]    r_bitstream;
 
     // ---------------------------------------------------------------------------
     // DUT instantiation
@@ -53,43 +26,140 @@ module SNG_TB;
         .STRIDE     (TB_STRIDE),
         .QUANT      (TB_QUANT)
     ) dut (
-        .iData   (iData),
-        .oBitstream  (oBitstream)
+        .clk            (clk),
+        .rst_n          (rst_n),
+        .w_data         (w_data),
+        .w_valid        (w_valid),
+        .r_ready        (r_ready),
+        .wlast          (wlast),
+        .r_bitstream    (r_bitstream)
     );
 
+    always #50 clk = ~clk;
+
     // ---------------------------------------------------------------------------
-    // Reference model (mirrors the RTL intent)
-    // u = q + 128
-    // s = (u * T + (1<< (QUANT-1) ) ) >> QUANT
-    // return s
+    // generate data
     // ---------------------------------------------------------------------------
-    function automatic logic [TB_BITSTREAM - 1:0] ref_sng (int q);
+    logic [TB_QUANT-1 : 0] test_data;
+    logic test_last,test_valid,test_ready;
+    task automatic generate_data;
+        input[TB_QUANT-1 : 0] data;
+        input last,valid,ready;
+        begin
+            test_data = data;
+            test_last = last;
+            test_valid = valid;
+            test_ready = ready;
+            @(posedge clk);
+        end
+    endtask
+
+    task random_data_generate;
+        input int unsigned total_loop;
+        begin
+            for(int i = 0 ; i < total_loop ; i = i+1)
+            begin
+                int rand_val;
+                rand_val = $urandom_range(128, -127);
+                generate_data(rand_val,$urandom_range(1, 0),1,1);
+            end
+        end
+    endtask
+
+    // ---------------------------------------------------------------------------
+    // assign input : test data assign to design
+    // ---------------------------------------------------------------------------
+    assign w_data   = test_data;
+    assign w_valid  = test_valid;
+    assign r_ready  = test_ready;
+    assign wlast    = test_last;
+
+    // ---------------------------------------------------------------------------
+    // Reference model
+    // input : data / last / w_valid / r_ready
+    // combination for weyl + k
+    // ---------------------------------------------------------------------------
+    logic [TB_BITSTREAM - 1 : 0] exp_data;
+    integer k_phase = 0 ;
+    
+    always_ff @(posedge clk or negedge rst_n) begin
+        if (!rst_n)
+            k_phase  <= 0;
+        else if (test_valid && test_ready) begin  
+            if (test_last)      k_phase <= 0;        
+            else                k_phase <= (k_phase + 1) & 3;
+        end
+    end
+
+    function automatic logic [TB_BITSTREAM - 1:0] ref_sng (int tb_data,bit tb_last,bit tb_valid,bit tb_ready);
         logic [TB_BITSTREAM - 1 : 0] tb_bitstream;
         int idx , u , s;
         begin
-            //quota 
-            u = q + (1 << (TB_QUANT-1));
-            s = (u * TB_BITSTREAM + (1<< (TB_QUANT-1) ) ) >> TB_QUANT;
-            
-            //weyl
-            tb_bitstream = '0;
-            idx = TB_BASE;
-            for (int i = 0; i < s; i++) begin
-                tb_bitstream[idx] = 1'b1;
-                idx = (TB_STRIDE + idx) % TB_BITSTREAM ;
-            end 
+            if(tb_valid & tb_ready) begin
+                //quota 
+                u = tb_data + (1 << (TB_QUANT-1));
+                s = (u * TB_BITSTREAM + (1 << (TB_QUANT-1) ) ) >> TB_QUANT;
+                
+                //weyl
+                tb_bitstream = '0;
+                idx = TB_BASE + k_phase;
+                for (int i = 0; i < s; i++) begin
+                    tb_bitstream[idx] = 1'b1;
+                    idx = (TB_STRIDE + idx) % TB_BITSTREAM ;
+                end 
+            end
+            else
+                tb_bitstream = 'bz;
             return tb_bitstream;
         end
     endfunction
+    
+    assign exp_data = ref_sng($signed(test_data),test_last,test_valid,test_ready);
+    // ---------------------------------------------------------------------------
+    // tool : auto check
+    // ---------------------------------------------------------------------------
+    localparam DATA_WIDTH = TB_BITSTREAM;
+    logic [DATA_WIDTH-1 : 0] design_data;
+    assign design_data = r_bitstream;
+
+    int errors = 0;
+    task automatic auto_check;
+        begin
+            if(exp_data !== design_data)
+            begin
+                errors++;
+                $display("    ERROR : auto check compare result is failed, \n input_data : %d \n exp_data : %h , \n design_data : %h." ,test_data , exp_data, design_data);
+                $stop;
+            end
+        end
+    endtask
+
+    // ---------------------------------------------------------------------------
+    // testing task
+    // ---------------------------------------------------------------------------
+    task automatic all_range_check;
+        for(int i = 0 ; i < 3000 ; i = i+1)
+        begin
+            random_data_generate(1);
+            auto_check();
+        end
+    endtask
+    task automatic reset;
+        begin
+            clk     = 0;
+            rst_n   = 1;
+            @(posedge clk)
+            rst_n   = 0;
+            @(posedge clk)
+            rst_n   = 1;
+        end
+    endtask
 
 
+    // ---------------------------------------------------------------------------
+    // main
+    // ---------------------------------------------------------------------------
 
-
-    integer errors = 0;
-    localparam int DATA_RANGE_NEG = -(1 << (TB_QUANT-1));         // -128
-    localparam int DATA_RANGE_POS =  (1 << (TB_QUANT-1)) - 1;     //  127
-
-    // Optional VCD/FSDB dump
     initial begin
     `ifdef DUMPVCD
         $dumpfile("sng_tb.vcd");
@@ -97,39 +167,11 @@ module SNG_TB;
     `endif
     end
 
-    // Main test sequence: sweep all q, then random samples
     initial begin
         $display("\n=== SNG_TB TB start ===");
         $display("Params: BITSTREAM=%0d BASE=%0d STRIDE=%0d QUANT=%0d", TB_BITSTREAM, TB_BASE, TB_STRIDE, TB_QUANT);
-
-
-        // Deterministic sweep
-        for (int q = DATA_RANGE_NEG; q <= DATA_RANGE_POS; q++)begin
-            logic [TB_BITSTREAM-1:0] golden;
-
-            iData = q;
-            #1; // settle (purely combinational)
-            golden = ref_sng(q);
-
-            if (oBitstream !== golden) begin
-                errors++;
-                $error("Mismatch at q=%0d: design=%0d tb=%0d", q, oBitstream, golden);
-            end
-        end
-
-        // A few randoms (in-range)
-        // for (int t = 0; t < 1000; t++) begin
-        //     logic [$clog2(TB_BITSTREAM)-1:0] golden;
-        //     int q = $urandom_range(DATA_RANGE_NEG, DATA_RANGE_POS);
-        //     data = q;
-        //     #1; // settle (purely combinational)
-        //     golden = ref_quota(q);
-
-        //     if (quota_out !== golden) begin
-        //         errors++;
-        //         $error("Mismatch at q=%0d: design=%0d tb=%0d", q, quota_out, golden);
-        //     end
-        // end
+        reset();
+        all_range_check();
 
         if (errors == 0)begin
             $display("\n[PASS] All checks passed.\n");

@@ -33,13 +33,14 @@ module tb_fifo;
     localparam TB_DEPTH = 1024;
     localparam TB_PTR_NUM_BITS = $clog2(TB_DEPTH);
 
-    reg [DATA_WIDTH-1:0] fifo_mem [0:TB_DEPTH-1];
+    reg [DATA_WIDTH-1:0]    fifo_mem [0:TB_DEPTH-1];
+    
     reg [TB_PTR_NUM_BITS:0] wrp, rdp;
     reg [TB_PTR_NUM_BITS:0] drp;  
-    reg close_push,close_pop;
-    reg [DATA_WIDTH-1:0] push_data;
-    wire fifo_push,fifo_pop;
-    reg [DATA_WIDTH-1:0] push_data_wire;
+    reg                     close_push,close_pop;
+    reg [DATA_WIDTH-1:0]    push_data;
+    wire                    fifo_push,fifo_pop;
+    reg [DATA_WIDTH-1:0]    push_data_wire;
 
     assign fifo_push = !fifo_full & !close_push;
     assign fifo_pop = !fifo_empty & !close_pop;
@@ -102,26 +103,6 @@ module tb_fifo;
     assign data_in = push_data_wire;
     assign r_ready = fifo_pop;
     assign w_valid = fifo_push;
-    // always@(posedge clk or negedge rst_n)
-    // begin
-    //     if(fifo_pop)
-    //     begin
-    //         r_ready  <= 1;
-    //     end
-    //     else
-    //         r_ready <= 0;
-    // end
-
-    // always@(posedge clk)
-    // begin
-    //     if(fifo_push)
-    //     begin
-    //         w_valid <= 1;
-    //     end
-    //     else
-    //         w_valid <= 0;
-    // end
-
 
     // *******************************************************************************************
     // task auto_check : 
@@ -241,12 +222,3 @@ module tb_fifo;
     end
 
 endmodule
-/*
-("    ERROR : fifo_empty is not working.");
-("  CORRECT : Not have any error.");
-("FIFO FULL : data %h is not input fifo." , data);
-("    ERROR : fifo_full is not match to depth.");
-("    ERROR : fifo_full is not working.");
-("FIFO Empty: no data in fifo.")
-("    ERROR : auto check compare result is failed, in memory address : %d." , i);
-*/
