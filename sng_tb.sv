@@ -51,6 +51,7 @@ module SNG_TB;
             test_valid = valid;
             test_ready = ready;
             @(posedge clk);
+            test_valid = 0;
         end
     endtask
 
