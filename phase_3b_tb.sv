@@ -1,0 +1,106 @@
+`timescale 1ns/1ps
+// -----------------------------------------------------------------------------
+// Testbench: phase_3b_tb
+// Purpose  : Self-checking, parameterized SV testbench for module PHASE_3b
+// Design   : expects module PHASE_3b in your compile list
+// Params   : Override at compile time with +define+TB_BITSTREAM=... etc.
+// Sim tips :
+//   - Questa  : vlog -sv phase_3b.sv phase_3b_tb.sv ; vsim -c PHASE_3b_TB -do "run -all; quit"
+//   - VCS     : vcs -sverilog phase_3b.sv phase_3b_tb.sv -R
+//   - Verilator: verilator -sv --cc --exe sim_main.cpp phase_3b.sv phase_3b_tb.sv
+//   (or --binary)
+//   - Icarus  : iverilog -g2012 -o tb.vvp phase_3b.sv phase_3b_tb.sv ; vvp tb.vvp
+// -----------------------------------------------------------------------------
+
+`ifndef TB_BITSTREAM
+    `define TB_BITSTREAM 64
+`endif
+
+
+module PHASE_3b_TB;
+    // ---------------------------------------------------------------------------
+    // Parameters for DUT instantiation (override with +define+TB_*)
+    // ---------------------------------------------------------------------------
+    localparam int TB_BITSTREAM  = `TB_BITSTREAM;
+
+    // ---------------------------------------------------------------------------
+    // DUT I/O
+    // ---------------------------------------------------------------------------
+    logic [2:0]              k;
+    logic [TB_BITSTREAM-1:0] iBitstream;
+    logic [TB_BITSTREAM-1:0] oBitstream;
+    // ---------------------------------------------------------------------------
+    // DUT instantiation
+    // ---------------------------------------------------------------------------
+    PHASE_3b #(
+        .BITSTREAM  (TB_BITSTREAM)
+    ) dut (
+        .k          (k),
+        .in_bits    (iBitstream),
+        .out_bits   (oBitstream)
+    );
+    // ---------------------------------------------------------------------------
+    // Reference model (mirrors the RTL intent)
+    // u = q + 128
+    // s = (u * T + (1<< (QUANT-1) ) ) >> QUANT
+    // return s
+    // ---------------------------------------------------------------------------
+    function automatic logic [63:0] rand64();
+        return { $urandom(), $urandom() };  // 32b + 32b = 64b
+    endfunction
+
+
+    function automatic logic [TB_BITSTREAM-1:0] ref_phase (
+        input logic [TB_BITSTREAM-1:0]  in_bits,
+        input int                       k
+    );
+        logic [TB_BITSTREAM-1:0] out_bits;
+        begin
+            out_bits = (k == 0) ? in_bits : ((in_bits >> k) | (in_bits << (TB_BITSTREAM - k))); // 右旋 k
+            return out_bits;
+        end
+    endfunction
+
+    integer errors = 0;
+    integer k_phase;
+
+    // Optional VCD/FSDB dump
+    initial begin
+    `ifdef DUMPVCD
+        $dumpfile("phase_3b_tb.vcd");
+        $dumpvars(0, PHASE_3b_TB);
+    `endif
+    end
+
+    // Main test sequence: sweep all q, then random samples
+    initial begin
+        $display("\n=== PHASE TB start ===");
+        $display("Params: BITSTREAM=%0d ", TB_BITSTREAM);
+
+
+        // Deterministic sweep
+        for (int q = 0; q <= 100; q++)begin
+            logic [TB_BITSTREAM-1:0] golden , randNum;
+            k_phase = q % 8;
+            randNum = rand64();
+            iBitstream = randNum;
+            k = (k_phase);
+            #1; // settle (purely combinational)
+            golden = ref_phase(randNum,k_phase);
+
+            if (oBitstream !== golden) begin
+                errors++;
+                $error("Mismatch at q=%0d: design=%0d tb=%0d", q, oBitstream, golden);
+            end
+        end
+
+        if (errors == 0)begin
+            $display("\n[PASS] All checks passed.\n");
+            $finish;
+        end
+        else begin
+            $display("\n[FAIL] %0d mismatches detected.\n", errors);
+            $fatal(1);
+        end
+    end
+endmodule

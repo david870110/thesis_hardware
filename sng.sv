@@ -15,7 +15,8 @@ module SNG #(
 );
     logic [$clog2(BITSTREAM) : 0 ] quota_num;
     logic [BITSTREAM - 1 : 0] weyl_bit;
-    logic [1:0] k;
+    // logic [1:0] k;
+    logic [2:0] k;
     logic [BITSTREAM - 1 : 0] phase_bit;
 
     QUOTA #(
@@ -41,12 +42,20 @@ module SNG #(
         else if(r_ready & w_valid) k <= k+1;
             
     
-    PHASE_2b #(
+    // PHASE_2b #(
+    //     .BITSTREAM  (BITSTREAM)
+    // ) dut (
+    //     .k          (k),
+    //     .in_bits    (weyl_bit),
+    //     .out_bits   (phase_bit)
+    // );
+
+    PHASE_3b #(
         .BITSTREAM  (BITSTREAM)
     ) dut (
         .k          (k),
         .in_bits    (weyl_bit),
-        .out_bits   (phase_bit)
+        .out_bits   (r_bitstream)
     );
 
 endmodule
