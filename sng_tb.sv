@@ -1,42 +1,14 @@
 `timescale 1ns/1ps
-// -----------------------------------------------------------------------------
-// Testbench: weyl_tb
-// Purpose  : Self-checking, parameterized SV testbench for module WEYL
-// Design   : expects module WEYL in your compile list (e.g., weyl_table.sv)
-// Params   : Override at compile time with +define+TB_BITSTREAM=... etc.
-// Sim tips :
-//   - Questa  : vlog -sv weyl_table.sv weyl_tb.sv ; vsim -c weyl_tb -do "run -all; quit"
-//   - VCS     : vcs -sverilog weyl_table.sv weyl_tb.sv -R
-//   - Verilator: verilator -sv --cc --exe sim_main.cpp weyl_table.sv weyl_tb.sv  (or --binary)
-//   - Icarus  : iverilog -g2012 -o tb.vvp weyl_table.sv weyl_tb.sv ; vvp tb.vvp
-// -----------------------------------------------------------------------------
-
-`ifndef TB_BITSTREAM
-    `define TB_BITSTREAM 64
-`endif
-
-`ifndef TB_BASE
-    `define TB_BASE 2
-`endif
-
-`ifndef TB_STRIDE
-    `define TB_STRIDE 17
-`endif
-
-`ifndef TB_QUANT
-    `define TB_QUANT 8
-`endif
-
 
 
 module SNG_TB;
     // ---------------------------------------------------------------------------
     // Parameters for DUT instantiation (override with +define+TB_*)
     // ---------------------------------------------------------------------------
-    localparam int TB_BITSTREAM  = `TB_BITSTREAM;
-    localparam int TB_BASE       = `TB_BASE;
-    localparam int TB_STRIDE     = `TB_STRIDE;
-    localparam int TB_QUANT      = `TB_QUANT;
+    localparam int TB_BITSTREAM  = 64;
+    localparam int TB_BASE       = 2;
+    localparam int TB_STRIDE     = 17;
+    localparam int TB_QUANT      = 8;
 
     // ---------------------------------------------------------------------------
     // DUT I/O
@@ -63,6 +35,9 @@ module SNG_TB;
     // s = (u * T + (1<< (QUANT-1) ) ) >> QUANT
     // return s
     // ---------------------------------------------------------------------------
+    logic clk, rst_n;
+    always #50 clk = ~clk;
+
     function automatic logic [TB_BITSTREAM - 1:0] ref_sng (int q);
         logic [TB_BITSTREAM - 1 : 0] tb_bitstream;
         int idx , u , s;
@@ -81,6 +56,7 @@ module SNG_TB;
             return tb_bitstream;
         end
     endfunction
+
 
 
 

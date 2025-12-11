@@ -37,8 +37,10 @@ module SNG #(
 
     always_ff @(posedge clk or negedge rst_n)
         if(!rst_n) k <= 0;
+        else if(wlast) k <= 0; 
         else if(r_ready & w_valid) k <= k+1;
-
+            
+    
     PHASE_2b #(
         .BITSTREAM  (BITSTREAM)
     ) dut (
